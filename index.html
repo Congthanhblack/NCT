@@ -20,7 +20,7 @@ body{
     height:100vh;
 }
 
-/* ===== HIỆU ỨNG HACKER MATRIX ===== */
+/* ===== MATRIX ===== */
 canvas{
     position:fixed;
     top:0;
@@ -31,7 +31,7 @@ canvas{
 /* ===== TEXT CHÍNH ===== */
 .main-text{
     position:absolute;
-    top:35%;
+    top:30%;
     width:100%;
     text-align:center;
     font-size:6vw;
@@ -41,21 +41,20 @@ canvas{
 
 @keyframes glow{
     from{ text-shadow:0 0 10px #00ff99;}
-    to{ text-shadow:0 0 25px #00ff99, 0 0 40px #00ff99;}
+    to{ text-shadow:0 0 25px #00ff99,0 0 40px #00ff99;}
 }
 
-/* ===== SPAM NHỚ EM ===== */
+/* ===== SPAM ===== */
 .spam{
     position:absolute;
-    top:55%;
+    top:50%;
     width:100%;
-    height:40%;
+    height:50%;
     overflow:hidden;
     font-size:4vw;
-    opacity:0.8;
 }
 
-/* ===== DÒNG CHẠY NGANG GIỮA MÀN ===== */
+/* ===== MARQUEE ===== */
 .marquee-container{
     position:fixed;
     top:50%;
@@ -64,7 +63,6 @@ canvas{
     transform:translateY(-50%);
     overflow:hidden;
     pointer-events:none;
-    z-index:5;
 }
 
 .marquee-text{
@@ -76,30 +74,61 @@ canvas{
     animation:marqueeMove 18s linear infinite;
 }
 
-/* glitch effect */
 .marquee-text span{
-    position:relative;
     animation: glitch 2s infinite;
 }
 
 @keyframes glitch{
-    0%{ left:0; }
-    20%{ left:1px; }
-    40%{ left:-1px; }
-    60%{ left:1px; }
-    80%{ left:-1px; }
-    100%{ left:0; }
+    0%{ left:0; position:relative;}
+    20%{ left:1px;}
+    40%{ left:-1px;}
+    60%{ left:1px;}
+    80%{ left:-1px;}
+    100%{ left:0;}
 }
 
 @keyframes marqueeMove{
-    from{ transform:translateX(100%); }
-    to{ transform:translateX(-100%); }
+    from{ transform:translateX(100%);}
+    to{ transform:translateX(-100%);}
 }
 
-/* tối ưu mobile */
+/* ===== BUTTON ===== */
+.decode-btn{
+    position:absolute;
+    bottom:40px;
+    left:50%;
+    transform:translateX(-50%);
+    padding:12px 25px;
+    font-size:16px;
+    background:#00ff99;
+    border:none;
+    border-radius:30px;
+    cursor:pointer;
+    font-weight:bold;
+    box-shadow:0 0 15px #00ff99;
+}
+
+.decode-btn:active{
+    transform:translateX(-50%) scale(0.95);
+}
+
+/* ===== HEART EFFECT ===== */
+.heart{
+    position:fixed;
+    font-size:20px;
+    animation:floatUp 2s linear forwards;
+    pointer-events:none;
+}
+
+@keyframes floatUp{
+    0%{ transform:translateY(0); opacity:1;}
+    100%{ transform:translateY(-150px); opacity:0;}
+}
+
+/* Desktop fix */
 @media (min-width:768px){
     .main-text{ font-size:40px;}
-    .spam{ font-size:24px;}
+    .spam{ font-size:22px;}
     .marquee-text{ font-size:28px;}
 }
 </style>
@@ -114,22 +143,32 @@ canvas{
 
 <div class="spam" id="spamBox"></div>
 
+<button class="decode-btn" onclick="decodeLove()">
+    Giải mã trái tim 💚
+</button>
+
 <script>
-/* ===== MATRIX EFFECT ===== */
+/* ===== ÂM THANH HACKER ===== */
+function playSound(){
+    const audio = new Audio("https://www.soundjay.com/button/beep-07.wav");
+    audio.volume = 0.4;
+    audio.play();
+}
+window.addEventListener("click", playSound, { once:true });
+
+/* ===== MATRIX ===== */
 const canvas = document.getElementById("matrix");
 const ctx = canvas.getContext("2d");
 
 canvas.height = window.innerHeight;
 canvas.width = window.innerWidth;
 
-const letters = "010101 I MISS YOU ❤️ ";
+const letters = "0101 I MISS YOU 💚 ";
 const fontSize = 14;
 const columns = canvas.width / fontSize;
 const drops = [];
 
-for(let i=0;i<columns;i++){
-    drops[i]=1;
-}
+for(let i=0;i<columns;i++){ drops[i]=1; }
 
 function draw(){
     ctx.fillStyle="rgba(0,0,0,0.05)";
@@ -148,10 +187,9 @@ function draw(){
         drops[i]++;
     }
 }
-
 setInterval(draw,33);
 
-/* ===== SPAM ANH NHỚ EM ===== */
+/* ===== SPAM ===== */
 const spamBox = document.getElementById("spamBox");
 
 function spamLove(){
@@ -162,17 +200,14 @@ function spamLove(){
     div.style.top=Math.random()*90+"%";
     div.style.color=`hsl(${Math.random()*360},80%,60%)`;
     spamBox.appendChild(div);
-
     setTimeout(()=>{div.remove()},4000);
 }
+setInterval(spamLove,250);
 
-setInterval(spamLove,200);
-
-/* ===== DÒNG CHẠY NGANG GLITCH ===== */
+/* ===== MARQUEE ===== */
 const message = "Cười lên công chúa ";
 const container = document.createElement("div");
 container.className="marquee-container";
-
 const text = document.createElement("div");
 text.className="marquee-text";
 
@@ -185,16 +220,33 @@ function buildText(str){
         text.appendChild(span);
     });
 }
-
 buildText(message.repeat(5));
-
 container.appendChild(text);
 document.body.appendChild(container);
 
-/* ===== RESPONSIVE FIX ===== */
+/* ===== NÚT GIẢI MÃ ===== */
+function decodeLove(){
+    alert("💚 Hệ thống xác nhận: Anh yêu em rất nhiều!");
+}
+
+/* ===== HEART TOUCH EFFECT ===== */
+document.addEventListener("touchstart",createHeart);
+document.addEventListener("click",createHeart);
+
+function createHeart(e){
+    const heart=document.createElement("div");
+    heart.className="heart";
+    heart.innerHTML="💚";
+    heart.style.left=e.clientX+"px";
+    heart.style.top=e.clientY+"px";
+    document.body.appendChild(heart);
+    setTimeout(()=>heart.remove(),2000);
+}
+
+/* Responsive */
 window.addEventListener("resize",()=>{
-    canvas.height = window.innerHeight;
-    canvas.width = window.innerWidth;
+    canvas.height=window.innerHeight;
+    canvas.width=window.innerWidth;
 });
 </script>
 

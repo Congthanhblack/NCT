@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Secret Message</title>
+<title>Love System</title>
 
 <style>
 *{
@@ -17,123 +17,48 @@ body{
     background:black;
     color:#00ff99;
     overflow:hidden;
-    height:100vh;
 }
 
-/* ===== MATRIX ===== */
-canvas{
+/* ===== INTRO HACKER ===== */
+#intro{
     position:fixed;
     top:0;
     left:0;
-    z-index:-1;
-}
-
-/* ===== TEXT CHÍNH ===== */
-.main-text{
-    position:absolute;
-    top:30%;
     width:100%;
-    text-align:center;
-    font-size:6vw;
-    font-weight:bold;
-    animation: glow 2s infinite alternate;
+    height:100vh;
+    background:black;
+    color:#00ff99;
+    padding:20px;
+    font-size:14px;
+    white-space:pre-wrap;
+    z-index:9999;
 }
 
-@keyframes glow{
-    from{ text-shadow:0 0 10px #00ff99;}
-    to{ text-shadow:0 0 25px #00ff99,0 0 40px #00ff99;}
-}
-
-/* ===== SPAM ===== */
-.spam{
-    position:absolute;
-    top:50%;
-    width:100%;
-    height:50%;
-    overflow:hidden;
-    font-size:4vw;
-}
-
-/* ===== MARQUEE ===== */
-.marquee-container{
-    position:fixed;
-    top:50%;
-    left:0;
-    width:100%;
-    transform:translateY(-50%);
-    overflow:hidden;
-    pointer-events:none;
-}
-
-.marquee-text{
+.cursor{
     display:inline-block;
-    white-space:nowrap;
-    font-size:5vw;
-    font-weight:bold;
-    opacity:0.15;
-    animation:marqueeMove 18s linear infinite;
-}
-
-.marquee-text span{
-    animation: glitch 2s infinite;
-}
-
-@keyframes glitch{
-    0%{ left:0; position:relative;}
-    20%{ left:1px;}
-    40%{ left:-1px;}
-    60%{ left:1px;}
-    80%{ left:-1px;}
-    100%{ left:0;}
-}
-
-@keyframes marqueeMove{
-    from{ transform:translateX(100%);}
-    to{ transform:translateX(-100%);}
-}
-
-/* ===== BUTTON ===== */
-.decode-btn{
-    position:absolute;
-    bottom:40px;
-    left:50%;
-    transform:translateX(-50%);
-    padding:12px 25px;
-    font-size:16px;
+    width:10px;
     background:#00ff99;
-    border:none;
-    border-radius:30px;
-    cursor:pointer;
-    font-weight:bold;
-    box-shadow:0 0 15px #00ff99;
+    animation:blink 1s infinite;
 }
 
-.decode-btn:active{
-    transform:translateX(-50%) scale(0.95);
+@keyframes blink{
+    0%,50%,100%{opacity:1;}
+    25%,75%{opacity:0;}
 }
 
-/* ===== HEART EFFECT ===== */
-.heart{
-    position:fixed;
-    font-size:20px;
-    animation:floatUp 2s linear forwards;
-    pointer-events:none;
-}
-
-@keyframes floatUp{
-    0%{ transform:translateY(0); opacity:1;}
-    100%{ transform:translateY(-150px); opacity:0;}
-}
-
-/* Desktop fix */
-@media (min-width:768px){
-    .main-text{ font-size:40px;}
-    .spam{ font-size:22px;}
-    .marquee-text{ font-size:28px;}
+/* ===== ẨN NỘI DUNG CHÍNH BAN ĐẦU ===== */
+#mainContent{
+    display:none;
 }
 </style>
 </head>
 <body>
+
+<div id="intro"></div>
+
+<div id="mainContent">
+
+<!-- ====== TOÀN BỘ CODE V4 GIỮ NGUYÊN ====== -->
 
 <canvas id="matrix"></canvas>
 
@@ -147,8 +72,49 @@ canvas{
     Giải mã trái tim 💚
 </button>
 
+</div>
+
 <script>
-/* ===== ÂM THANH HACKER ===== */
+
+/* ===== INTRO TYPEWRITER ===== */
+
+const introText = `
+> Initializing LoveSystem.exe...
+> Connecting to Heart_Server...
+> Bypassing Ego Firewall...
+> Injecting Emotion Script...
+> Access Granted ❤️
+> Deploying Secret Message...
+`;
+
+const intro = document.getElementById("intro");
+let i = 0;
+
+function typeWriter(){
+    if(i < introText.length){
+        intro.innerHTML += introText.charAt(i);
+        i++;
+        setTimeout(typeWriter, 35);
+    } else {
+        setTimeout(startMain, 1000);
+    }
+}
+
+function startMain(){
+    intro.style.opacity="0";
+    setTimeout(()=>{
+        intro.remove();
+        document.getElementById("mainContent").style.display="block";
+        initMain();
+    },800);
+}
+
+typeWriter();
+
+/* ===== PHẦN V4 CHẠY SAU INTRO ===== */
+function initMain(){
+
+/* ÂM THANH */
 function playSound(){
     const audio = new Audio("https://www.soundjay.com/button/beep-07.wav");
     audio.volume = 0.4;
@@ -156,7 +122,7 @@ function playSound(){
 }
 window.addEventListener("click", playSound, { once:true });
 
-/* ===== MATRIX ===== */
+/* MATRIX */
 const canvas = document.getElementById("matrix");
 const ctx = canvas.getContext("2d");
 
@@ -189,7 +155,7 @@ function draw(){
 }
 setInterval(draw,33);
 
-/* ===== SPAM ===== */
+/* SPAM */
 const spamBox = document.getElementById("spamBox");
 
 function spamLove(){
@@ -204,50 +170,62 @@ function spamLove(){
 }
 setInterval(spamLove,250);
 
-/* ===== MARQUEE ===== */
+/* MARQUEE */
 const message = "Cười lên công chúa ";
 const container = document.createElement("div");
-container.className="marquee-container";
-const text = document.createElement("div");
-text.className="marquee-text";
+container.style.position="fixed";
+container.style.top="50%";
+container.style.left="0";
+container.style.width="100%";
+container.style.transform="translateY(-50%)";
+container.style.overflow="hidden";
 
-function buildText(str){
-    text.innerHTML="";
-    str.split("").forEach((char,i)=>{
-        const span=document.createElement("span");
-        span.textContent=char;
-        span.style.color=`hsl(${(i*20)%360},80%,60%)`;
-        text.appendChild(span);
-    });
-}
-buildText(message.repeat(5));
+const text = document.createElement("div");
+text.style.whiteSpace="nowrap";
+text.style.fontSize="5vw";
+text.style.opacity="0.15";
+text.style.animation="marqueeMove 18s linear infinite";
+
+text.innerHTML = message.repeat(5);
 container.appendChild(text);
 document.body.appendChild(container);
 
-/* ===== NÚT GIẢI MÃ ===== */
-function decodeLove(){
+/* BUTTON */
+window.decodeLove = function(){
     alert("💚 Hệ thống xác nhận: Anh yêu em rất nhiều!");
 }
 
-/* ===== HEART TOUCH EFFECT ===== */
+/* HEART TOUCH */
 document.addEventListener("touchstart",createHeart);
 document.addEventListener("click",createHeart);
 
 function createHeart(e){
     const heart=document.createElement("div");
-    heart.className="heart";
     heart.innerHTML="💚";
+    heart.style.position="fixed";
     heart.style.left=e.clientX+"px";
     heart.style.top=e.clientY+"px";
+    heart.style.animation="floatUp 2s linear forwards";
     document.body.appendChild(heart);
     setTimeout(()=>heart.remove(),2000);
 }
 
-/* Responsive */
-window.addEventListener("resize",()=>{
-    canvas.height=window.innerHeight;
-    canvas.width=window.innerWidth;
-});
+}
+
+/* KEYFRAMES thêm */
+const style = document.createElement("style");
+style.innerHTML = `
+@keyframes marqueeMove{
+from{transform:translateX(100%);}
+to{transform:translateX(-100%);}
+}
+@keyframes floatUp{
+0%{transform:translateY(0);opacity:1;}
+100%{transform:translateY(-150px);opacity:0;}
+}
+`;
+document.head.appendChild(style);
+
 </script>
 
 </body>

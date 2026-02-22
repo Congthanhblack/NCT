@@ -1,231 +1,215 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Love System</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Love System - HD70NamNCT</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Courier New', Courier, monospace; }
+        body { background: black; color: #00ff99; overflow: hidden; user-select: none; }
 
-<style>
-*{
-    margin:0;
-    padding:0;
-    box-sizing:border-box;
-    font-family: monospace;
-}
+        /* ===== INTRO SCANNER ===== */
+        #intro {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100vh;
+            background: black; color: #00ff99; padding: 30px; font-size: 16px;
+            white-space: pre-wrap; z-index: 10000; line-height: 1.5;
+        }
+        .cursor { display: inline-block; width: 10px; height: 18px; background: #00ff99; animation: blink 0.8s infinite; }
+        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
 
-body{
-    background:black;
-    color:#00ff99;
-    overflow:hidden;
-}
+        /* ===== GIAO DIỆN CHÍNH ===== */
+        #mainContent { display: none; position: relative; width: 100vw; height: 100vh; }
+        canvas { display: block; position: absolute; top: 0; left: 0; z-index: 1; }
 
-/* ===== INTRO HACKER ===== */
-#intro{
-    position:fixed;
-    top:0;
-    left:0;
-    width:100%;
-    height:100vh;
-    background:black;
-    color:#00ff99;
-    padding:20px;
-    font-size:14px;
-    white-space:pre-wrap;
-    z-index:9999;
-}
+        .ui-overlay {
+            position: relative; z-index: 10; width: 100%; height: 100%;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+        }
 
-.cursor{
-    display:inline-block;
-    width:10px;
-    background:#00ff99;
-    animation:blink 1s infinite;
-}
+        .main-title {
+            font-size: 2.5rem; font-weight: bold; text-align: center;
+            text-shadow: 0 0 20px #00ff99; margin-bottom: 50px;
+            animation: glitch 2.5s infinite;
+        }
 
-@keyframes blink{
-    0%,50%,100%{opacity:1;}
-    25%,75%{opacity:0;}
-}
+        /* ===== HỆ THỐNG NÚT BẤM (ORDER SYSTEM) ===== */
+        .order-panel {
+            background: rgba(0, 40, 20, 0.4); border: 1px solid #00ff99;
+            padding: 30px; border-radius: 15px; backdrop-filter: blur(5px);
+            display: flex; flex-direction: column; gap: 20px; align-items: center;
+            box-shadow: 0 0 30px rgba(0, 255, 153, 0.2);
+        }
 
-/* ===== ẨN NỘI DUNG CHÍNH BAN ĐẦU ===== */
-#mainContent{
-    display:none;
-}
-</style>
+        .btn-confirm {
+            padding: 15px 40px; font-size: 1.2rem; font-weight: bold;
+            background: #00ff99; color: black; border: none; border-radius: 50px;
+            cursor: pointer; box-shadow: 0 0 15px #00ff99; transition: 0.3s;
+            animation: pulse 1.5s infinite;
+        }
+
+        .action-group { display: flex; gap: 15px; }
+        .btn-secondary {
+            padding: 10px 20px; background: transparent; color: #00ff99;
+            border: 1px solid #00ff99; border-radius: 5px; cursor: pointer;
+            font-size: 0.9rem; transition: 0.3s;
+        }
+        .btn-secondary:hover { background: rgba(0, 255, 153, 0.1); }
+
+        #returnBtn { position: relative; transition: all 0.1s ease; }
+
+        /* ===== MODAL THÔNG BÁO ===== */
+        #modal {
+            display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            width: 85%; max-width: 400px; background: #000; border: 2px solid #00ff99;
+            padding: 25px; z-index: 1000; border-radius: 10px; text-align: center;
+            box-shadow: 0 0 50px #00ff99;
+        }
+        #modalMsg { margin-bottom: 20px; line-height: 1.6; }
+
+        /* ===== ANIMATIONS ===== */
+        @keyframes glitch {
+            0% { transform: skew(0); }
+            2% { transform: skew(5deg); text-shadow: 2px 0 red; }
+            4% { transform: skew(-5deg); text-shadow: -2px 0 blue; }
+            6% { transform: skew(0); }
+        }
+        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
+        @keyframes floatUp { 0% { transform: translateY(0) scale(1); opacity: 1; } 100% { transform: translateY(-150px) scale(2); opacity: 0; } }
+
+    </style>
 </head>
 <body>
 
 <div id="intro"></div>
 
 <div id="mainContent">
+    <canvas id="matrix"></canvas>
+    
+    <div class="ui-overlay">
+        <div class="main-title">HACKING COMPLETED<br>HEART_ACCESS: GRANTED 💚</div>
 
-<!-- ====== TOÀN BỘ CODE V4 GIỮ NGUYÊN ====== -->
+        <div class="order-panel">
+            <p style="font-size: 0.8rem; margin-bottom: 10px;">ID: HD70NamNCT | Gói: Yêu Thương Trọn Đời</p>
+            <button class="btn-confirm" onclick="showModal('confirm')">XÁC NHẬN NHẬN HÀNG 😍</button>
+            <div class="action-group">
+                <button class="btn-secondary" onclick="showModal('cancel')">Hủy đơn</button>
+                <button class="btn-secondary" id="returnBtn" onmouseover="runAway()" onclick="runAway()">Hoàn trả hàng</button>
+            </div>
+        </div>
+    </div>
 
-<canvas id="matrix"></canvas>
-
-<div class="main-text">
-    Anh yêu em 😎💚
-</div>
-
-<div class="spam" id="spamBox"></div>
-
-<button class="decode-btn" onclick="decodeLove()">
-    Giải mã trái tim 💚
-</button>
-
+    <div id="modal">
+        <div id="modalMsg"></div>
+        <button class="btn-secondary" onclick="closeModal()">Đã hiểu (Chấp nhận số phận)</button>
+    </div>
 </div>
 
 <script>
+    /* 1. INTRO TYPEWRITER */
+    const introText = `> THÔNG BÁO QUAN TRỌNG:
+> Đang quét bảo mật hệ thống... [OK]
+> Phát hiện đơn hàng đặc biệt: #HD70NamNCT
+> 
+> Xin chào quý khách! Đây là sản phẩm được order riêng.
+> Lưu ý: Đây là hàng có 1-0-2 trên thế giới. 
+> Mọi phiên bản tương tự bạn thấy ở nơi khác đều là
+> hàng giả, hàng nhái, hàng Fa-ce chất lượng kém! 
+> 
+> Tiến trình:
+> [###-------] 30% Đang giải mã trái tim...
+> [######----] 60% Bẻ khóa hàng rào cảm xúc...
+> [#########-] 95% Đang tiêm virus "Thương Em"...
+> [##########] 100% TRUY CẬP THÀNH CÔNG!
+> 
+> Đang hiển thị thông điệp cuối cùng...`;
 
-/* ===== INTRO TYPEWRITER ===== */
-
-const introText = `
-> Initializing LoveSystem.exe...
-> Connecting to Heart_Server...
-> Bypassing Ego Firewall...
-> Injecting Emotion Script...
-> Access Granted ❤️
-> Deploying Secret Message...
-`;
-
-const intro = document.getElementById("intro");
-let i = 0;
-
-function typeWriter(){
-    if(i < introText.length){
-        intro.innerHTML += introText.charAt(i);
-        i++;
-        setTimeout(typeWriter, 35);
-    } else {
-        setTimeout(startMain, 1000);
+    let i = 0;
+    function typeIntro() {
+        if (i < introText.length) {
+            document.getElementById("intro").innerHTML = introText.substring(0, i + 1) + '<span class="cursor"></span>';
+            i++;
+            setTimeout(typeIntro, 30);
+        } else {
+            setTimeout(() => {
+                document.getElementById("intro").style.display = "none";
+                document.getElementById("mainContent").style.display = "block";
+                startMatrix();
+            }, 1500);
+        }
     }
-}
+    typeIntro();
 
-function startMain(){
-    intro.style.opacity="0";
-    setTimeout(()=>{
-        intro.remove();
-        document.getElementById("mainContent").style.display="block";
-        initMain();
-    },800);
-}
+    /* 2. MATRIX EFFECT */
+    function startMatrix() {
+        const canvas = document.getElementById("matrix");
+        const ctx = canvas.getContext("2d");
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
 
-typeWriter();
+        const chars = "01LOVE💚IMISSYOUアァカサタナハマ";
+        const fontSize = 16;
+        const columns = canvas.width / fontSize;
+        const drops = Array(Math.floor(columns)).fill(1);
 
-/* ===== PHẦN V4 CHẠY SAU INTRO ===== */
-function initMain(){
+        function draw() {
+            ctx.fillStyle = "rgba(0, 0, 0, 0.05)";
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = "#00ff99";
+            ctx.font = fontSize + "px monospace";
 
-/* ÂM THANH */
-function playSound(){
-    const audio = new Audio("https://www.soundjay.com/button/beep-07.wav");
-    audio.volume = 0.4;
-    audio.play();
-}
-window.addEventListener("click", playSound, { once:true });
-
-/* MATRIX */
-const canvas = document.getElementById("matrix");
-const ctx = canvas.getContext("2d");
-
-canvas.height = window.innerHeight;
-canvas.width = window.innerWidth;
-
-const letters = "0101 I MISS YOU 💚 ";
-const fontSize = 14;
-const columns = canvas.width / fontSize;
-const drops = [];
-
-for(let i=0;i<columns;i++){ drops[i]=1; }
-
-function draw(){
-    ctx.fillStyle="rgba(0,0,0,0.05)";
-    ctx.fillRect(0,0,canvas.width,canvas.height);
-
-    ctx.fillStyle="#00ff99";
-    ctx.font=fontSize+"px monospace";
-
-    for(let i=0;i<drops.length;i++){
-        const text = letters[Math.floor(Math.random()*letters.length)];
-        ctx.fillText(text,i*fontSize,drops[i]*fontSize);
-
-        if(drops[i]*fontSize>canvas.height && Math.random()>0.975)
-            drops[i]=0;
-
-        drops[i]++;
+            drops.forEach((y, x) => {
+                const text = chars[Math.floor(Math.random() * chars.length)];
+                ctx.fillText(text, x * fontSize, y * fontSize);
+                if (y * fontSize > canvas.height && Math.random() > 0.975) drops[x] = 0;
+                drops[x]++;
+            });
+        }
+        setInterval(draw, 33);
     }
-}
-setInterval(draw,33);
 
-/* SPAM */
-const spamBox = document.getElementById("spamBox");
+    /* 3. BUTTON LOGIC (DÍ DỎM) */
+    function showModal(type) {
+        const modal = document.getElementById("modal");
+        const msg = document.getElementById("modalMsg");
+        modal.style.display = "block";
 
-function spamLove(){
-    const div = document.createElement("div");
-    div.textContent="Anh nhớ em 🥺💚";
-    div.style.position="absolute";
-    div.style.left=Math.random()*90+"%";
-    div.style.top=Math.random()*90+"%";
-    div.style.color=`hsl(${Math.random()*360},80%,60%)`;
-    spamBox.appendChild(div);
-    setTimeout(()=>{div.remove()},4000);
-}
-setInterval(spamLove,250);
+        if (type === 'confirm') {
+            msg.innerHTML = "<b>XÁC NHẬN THÀNH CÔNG!</b><br><br>Gói bảo hành 'Vô thời hạn' đã được kích hoạt. Bạn đã chính thức sở hữu bản quyền trái tim này. Nghiêm cấm chia sẻ cho bên thứ ba! 💚";
+        } else if (type === 'cancel') {
+            msg.innerHTML = "<b>LỖI HỆ THỐNG: 403 FORBIDDEN</b><br><br>Hành động bị từ chối! Bạn đã lỡ click vào tình cảm này, hệ thống không cho phép quay xe dưới mọi hình thức. Chúc bạn may mắn lần sau! 😜";
+        }
+    }
 
-/* MARQUEE */
-const message = "Cười lên công chúa ";
-const container = document.createElement("div");
-container.style.position="fixed";
-container.style.top="50%";
-container.style.left="0";
-container.style.width="100%";
-container.style.transform="translateY(-50%)";
-container.style.overflow="hidden";
+    function closeModal() {
+        document.getElementById("modal").style.display = "none";
+    }
 
-const text = document.createElement("div");
-text.style.whiteSpace="nowrap";
-text.style.fontSize="5vw";
-text.style.opacity="0.15";
-text.style.animation="marqueeMove 18s linear infinite";
+    /* NÚT HOÀN HÀNG CHẠY TRỐN */
+    function runAway() {
+        const btn = document.getElementById("returnBtn");
+        const x = Math.random() * (window.innerWidth - btn.clientWidth);
+        const y = Math.random() * (window.innerHeight - btn.clientHeight);
+        
+        btn.style.position = "fixed";
+        btn.style.left = x + "px";
+        btn.style.top = y + "px";
+        btn.innerText = "Còn lâu mới trả! 😝";
+    }
 
-text.innerHTML = message.repeat(5);
-container.appendChild(text);
-document.body.appendChild(container);
-
-/* BUTTON */
-window.decodeLove = function(){
-    alert("💚 Hệ thống xác nhận: Anh yêu em rất nhiều!");
-}
-
-/* HEART TOUCH */
-document.addEventListener("touchstart",createHeart);
-document.addEventListener("click",createHeart);
-
-function createHeart(e){
-    const heart=document.createElement("div");
-    heart.innerHTML="💚";
-    heart.style.position="fixed";
-    heart.style.left=e.clientX+"px";
-    heart.style.top=e.clientY+"px";
-    heart.style.animation="floatUp 2s linear forwards";
-    document.body.appendChild(heart);
-    setTimeout(()=>heart.remove(),2000);
-}
-
-}
-
-/* KEYFRAMES thêm */
-const style = document.createElement("style");
-style.innerHTML = `
-@keyframes marqueeMove{
-from{transform:translateX(100%);}
-to{transform:translateX(-100%);}
-}
-@keyframes floatUp{
-0%{transform:translateY(0);opacity:1;}
-100%{transform:translateY(-150px);opacity:0;}
-}
-`;
-document.head.appendChild(style);
-
+    /* 4. HEART CLICK EFFECT */
+    document.addEventListener("click", (e) => {
+        if (e.target.tagName === 'BUTTON') return;
+        const heart = document.createElement("div");
+        heart.innerHTML = "💚";
+        heart.style.position = "fixed";
+        heart.style.left = e.clientX + "px";
+        heart.style.top = e.clientY + "px";
+        heart.style.fontSize = "20px";
+        heart.style.pointerEvents = "none";
+        heart.style.animation = "floatUp 1s ease-out forwards";
+        document.body.appendChild(heart);
+        setTimeout(() => heart.remove(), 1000);
+    });
 </script>
 
 </body>

@@ -2,215 +2,287 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Love System - HD70NamNCT</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Love System Pro - Limited Edition</title>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Courier New', Courier, monospace; }
-        body { background: black; color: #00ff99; overflow: hidden; user-select: none; }
-
-        /* ===== INTRO SCANNER ===== */
-        #intro {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100vh;
-            background: black; color: #00ff99; padding: 30px; font-size: 16px;
-            white-space: pre-wrap; z-index: 10000; line-height: 1.5;
+        :root {
+            --primary: #00ff99;
+            --bg: #000;
+            --text-shadow: 0 0 10px rgba(0, 255, 153, 0.7);
+            --font-main: 'Courier New', Courier, monospace;
         }
-        .cursor { display: inline-block; width: 10px; height: 18px; background: #00ff99; animation: blink 0.8s infinite; }
-        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
 
-        /* ===== GIAO DIỆN CHÍNH ===== */
-        #mainContent { display: none; position: relative; width: 100vw; height: 100vh; }
-        canvas { display: block; position: absolute; top: 0; left: 0; z-index: 1; }
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        
+        body { 
+            background: var(--bg); 
+            color: var(--primary); 
+            overflow: hidden; 
+            user-select: none;
+            font-family: var(--font-main);
+            height: 100vh;
+        }
 
-        .ui-overlay {
+        /* I. INTRO & PROGRESS BAR */
+        #intro {
+            position: fixed; inset: 0; background: var(--bg);
+            padding: 2rem; z-index: 10000; font-size: clamp(14px, 2vw, 18px);
+            line-height: 1.6; transition: opacity 0.8s ease;
+        }
+        .progress-container { width: 100%; max-width: 400px; height: 4px; background: #111; margin-top: 20px; border-radius: 2px; }
+        #progress-bar { width: 0%; height: 100%; background: var(--primary); box-shadow: 0 0 10px var(--primary); transition: width 0.1s; }
+        .cursor { display: inline-block; width: 8px; height: 1.2em; background: var(--primary); animation: blink 0.8s infinite; vertical-align: middle; }
+
+        /* II. MAIN INTERFACE */
+        #mainContent { display: none; position: relative; width: 100%; height: 100%; }
+        canvas { position: absolute; inset: 0; z-index: 1; pointer-events: none; }
+
+        .ui-layer {
             position: relative; z-index: 10; width: 100%; height: 100%;
             display: flex; flex-direction: column; align-items: center; justify-content: center;
+            padding: env(safe-area-inset-top) 20px env(safe-area-inset-bottom);
         }
 
-        .main-title {
-            font-size: 2.5rem; font-weight: bold; text-align: center;
-            text-shadow: 0 0 20px #00ff99; margin-bottom: 50px;
-            animation: glitch 2.5s infinite;
+        .title {
+            font-size: clamp(1.5rem, 5vw, 3rem); font-weight: bold; text-align: center;
+            text-shadow: var(--text-shadow); margin-bottom: 2rem; animation: glitch 3s infinite;
         }
 
-        /* ===== HỆ THỐNG NÚT BẤM (ORDER SYSTEM) ===== */
-        .order-panel {
-            background: rgba(0, 40, 20, 0.4); border: 1px solid #00ff99;
-            padding: 30px; border-radius: 15px; backdrop-filter: blur(5px);
-            display: flex; flex-direction: column; gap: 20px; align-items: center;
-            box-shadow: 0 0 30px rgba(0, 255, 153, 0.2);
+        .order-card {
+            background: rgba(0, 20, 10, 0.8); border: 1px solid var(--primary);
+            padding: 2rem; border-radius: 20px; backdrop-filter: blur(10px);
+            display: flex; flex-direction: column; gap: 1.5rem; align-items: center;
+            box-shadow: 0 0 30px rgba(0, 255, 153, 0.1);
         }
 
-        .btn-confirm {
-            padding: 15px 40px; font-size: 1.2rem; font-weight: bold;
-            background: #00ff99; color: black; border: none; border-radius: 50px;
-            cursor: pointer; box-shadow: 0 0 15px #00ff99; transition: 0.3s;
-            animation: pulse 1.5s infinite;
+        /* III. BUTTONS */
+        .btn {
+            border: none; border-radius: 50px; cursor: pointer; font-family: inherit;
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .btn-main {
+            padding: 1rem 2.5rem; font-size: 1.1rem; font-weight: bold;
+            background: var(--primary); color: #000; box-shadow: 0 0 20px var(--primary);
+            animation: pulse 2s infinite;
+        }
+        .btn-sub {
+            padding: 0.6rem 1.2rem; background: transparent; color: var(--primary);
+            border: 1px solid var(--primary); font-size: 0.9rem;
         }
 
-        .action-group { display: flex; gap: 15px; }
-        .btn-secondary {
-            padding: 10px 20px; background: transparent; color: #00ff99;
-            border: 1px solid #00ff99; border-radius: 5px; cursor: pointer;
-            font-size: 0.9rem; transition: 0.3s;
+        /* IV. MODAL & BACKDROP */
+        #modal-overlay {
+            display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85);
+            backdrop-filter: blur(4px); z-index: 1000; justify-content: center; align-items: center;
         }
-        .btn-secondary:hover { background: rgba(0, 255, 153, 0.1); }
-
-        #returnBtn { position: relative; transition: all 0.1s ease; }
-
-        /* ===== MODAL THÔNG BÁO ===== */
         #modal {
-            display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
-            width: 85%; max-width: 400px; background: #000; border: 2px solid #00ff99;
-            padding: 25px; z-index: 1000; border-radius: 10px; text-align: center;
-            box-shadow: 0 0 50px #00ff99;
+            width: 90%; max-width: 400px; background: #050505; border: 2px solid var(--primary);
+            padding: 2rem; border-radius: 15px; box-shadow: 0 0 50px var(--primary); text-align: center;
         }
-        #modalMsg { margin-bottom: 20px; line-height: 1.6; }
 
-        /* ===== ANIMATIONS ===== */
+        /* V. KEYFRAMES */
+        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+        @keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.05); } }
         @keyframes glitch {
-            0% { transform: skew(0); }
-            2% { transform: skew(5deg); text-shadow: 2px 0 red; }
-            4% { transform: skew(-5deg); text-shadow: -2px 0 blue; }
-            6% { transform: skew(0); }
+            0%, 100% { transform: translate(0); }
+            2% { transform: translate(-2px, 2px); }
+            4% { transform: translate(2px, -2px); }
         }
-        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
-        @keyframes floatUp { 0% { transform: translateY(0) scale(1); opacity: 1; } 100% { transform: translateY(-150px) scale(2); opacity: 0; } }
+        @keyframes heartOut { 
+            0% { transform: scale(0.5) translateY(0); opacity: 1; } 
+            100% { transform: scale(2) translateY(-100px); opacity: 0; } 
+        }
 
+        .heart-particle { position: fixed; pointer-events: none; animation: heartOut 0.8s ease-out forwards; z-index: 999; }
     </style>
 </head>
 <body>
 
-<div id="intro"></div>
+<div id="intro">
+    <div id="intro-text"></div>
+    <div class="progress-container"><div id="progress-bar"></div></div>
+</div>
 
 <div id="mainContent">
     <canvas id="matrix"></canvas>
-    
-    <div class="ui-overlay">
-        <div class="main-title">HACKING COMPLETED<br>HEART_ACCESS: GRANTED 💚</div>
-
-        <div class="order-panel">
-            <p style="font-size: 0.8rem; margin-bottom: 10px;">ID: HD70NamNCT | Gói: Yêu Thương Trọn Đời</p>
-            <button class="btn-confirm" onclick="showModal('confirm')">XÁC NHẬN NHẬN HÀNG 😍</button>
-            <div class="action-group">
-                <button class="btn-secondary" onclick="showModal('cancel')">Hủy đơn</button>
-                <button class="btn-secondary" id="returnBtn" onmouseover="runAway()" onclick="runAway()">Hoàn trả hàng</button>
+    <div class="ui-layer">
+        <h1 class="title">HEART SERVER<br>AUTHENTICATED 💚</h1>
+        <div class="order-card">
+            <p style="opacity: 0.7; font-size: 0.8rem;">REF: HD70NamNCT | STATUS: LIMITED_EDITION</p>
+            <button class="btn btn-main" onclick="UI.showModal('confirm')">XÁC NHẬN NHẬN HÀNG 😍</button>
+            <div style="display: flex; gap: 15px;">
+                <button class="btn btn-sub" onclick="UI.showModal('cancel')">Hủy đơn</button>
+                <button class="btn btn-sub" id="runaway-btn">Hoàn hàng</button>
             </div>
         </div>
     </div>
+</div>
 
+<div id="modal-overlay">
     <div id="modal">
-        <div id="modalMsg"></div>
-        <button class="btn-secondary" onclick="closeModal()">Đã hiểu (Chấp nhận số phận)</button>
+        <div id="modal-msg" style="margin-bottom: 1.5rem; line-height: 1.6;"></div>
+        <button class="btn btn-sub" style="width: 100%" onclick="UI.closeModal()">[ CHẤP NHẬN SỐ PHẬN ]</button>
     </div>
 </div>
 
 <script>
-    /* 1. INTRO TYPEWRITER */
-    const introText = `> THÔNG BÁO QUAN TRỌNG:
-> Đang quét bảo mật hệ thống... [OK]
-> Phát hiện đơn hàng đặc biệt: #HD70NamNCT
-> 
-> Xin chào quý khách! Đây là sản phẩm được order riêng.
-> Lưu ý: Đây là hàng có 1-0-2 trên thế giới. 
-> Mọi phiên bản tương tự bạn thấy ở nơi khác đều là
-> hàng giả, hàng nhái, hàng Fa-ce chất lượng kém! 
-> 
-> Tiến trình:
-> [###-------] 30% Đang giải mã trái tim...
-> [######----] 60% Bẻ khóa hàng rào cảm xúc...
-> [#########-] 95% Đang tiêm virus "Thương Em"...
-> [##########] 100% TRUY CẬP THÀNH CÔNG!
-> 
-> Đang hiển thị thông điệp cuối cùng...`;
+/**
+ * LOVE SYSTEM CONFIG
+ */
+const CONFIG = {
+    introText: `> WARNING: UNAUTHORIZED ACCESS DETECTED...
+> System Scan: Authenticity Verified [OK].
+>
+> Xin chào quý khách! Đây là đơn hàng mã [HD70NamNCT]. 
+> Hàng có 1-0-2. Thấy ở đâu khác là đồ Fa-ce nhé hihi...
+>
+> Bypassing Ego Firewall...
+> Injecting Emotion Script...
+> Deploying Secret Message...`,
+    matrixChars: "01LOVE💚IMISSYOUアァカサタナ",
+    maxHearts: 15,
+    typingSpeed: 30
+};
 
-    let i = 0;
-    function typeIntro() {
-        if (i < introText.length) {
-            document.getElementById("intro").innerHTML = introText.substring(0, i + 1) + '<span class="cursor"></span>';
-            i++;
-            setTimeout(typeIntro, 30);
-        } else {
-            setTimeout(() => {
-                document.getElementById("intro").style.display = "none";
-                document.getElementById("mainContent").style.display = "block";
-                startMatrix();
-            }, 1500);
-        }
+/**
+ * CORE MODULES
+ */
+const Core = {
+    init() {
+        this.initIntro();
+        this.initResize();
+    },
+
+    initIntro() {
+        const el = document.getElementById('intro-text');
+        const bar = document.getElementById('progress-bar');
+        let i = 0;
+        
+        const type = () => {
+            if (i < CONFIG.introText.length) {
+                el.innerHTML = CONFIG.introText.substring(0, i + 1) + '<span class="cursor"></span>';
+                bar.style.width = (i / CONFIG.introText.length) * 100 + '%';
+                i++;
+                setTimeout(type, CONFIG.typingSpeed);
+            } else {
+                setTimeout(() => this.startMain(), 1000);
+            }
+        };
+        type();
+    },
+
+    startMain() {
+        const intro = document.getElementById('intro');
+        intro.style.opacity = '0';
+        setTimeout(() => {
+            intro.remove(); // Xóa hoàn toàn khỏi DOM
+            document.getElementById('mainContent').style.display = 'block';
+            Matrix.init();
+            UI.init();
+        }, 800);
+    },
+
+    initResize() {
+        window.addEventListener('resize', () => {
+            if (Matrix.canvas) Matrix.resize();
+        });
     }
-    typeIntro();
+};
 
-    /* 2. MATRIX EFFECT */
-    function startMatrix() {
-        const canvas = document.getElementById("matrix");
-        const ctx = canvas.getContext("2d");
-        canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight;
+const Matrix = {
+    canvas: null, ctx: null, columns: 0, drops: [],
+    
+    init() {
+        this.canvas = document.getElementById('matrix');
+        this.ctx = this.canvas.getContext('2d');
+        this.resize();
+        this.animate();
+    },
 
-        const chars = "01LOVE💚IMISSYOUアァカサタナハマ";
-        const fontSize = 16;
-        const columns = canvas.width / fontSize;
-        const drops = Array(Math.floor(columns)).fill(1);
+    resize() {
+        this.canvas.width = window.innerWidth;
+        this.canvas.height = window.innerHeight;
+        this.columns = Math.floor(this.canvas.width / 18);
+        this.drops = Array(this.columns).fill(1);
+    },
 
-        function draw() {
-            ctx.fillStyle = "rgba(0, 0, 0, 0.05)";
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-            ctx.fillStyle = "#00ff99";
-            ctx.font = fontSize + "px monospace";
+    animate() {
+        this.ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
+        this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+        this.ctx.fillStyle = '#00ff99';
+        this.ctx.font = '16px monospace';
 
-            drops.forEach((y, x) => {
-                const text = chars[Math.floor(Math.random() * chars.length)];
-                ctx.fillText(text, x * fontSize, y * fontSize);
-                if (y * fontSize > canvas.height && Math.random() > 0.975) drops[x] = 0;
-                drops[x]++;
-            });
+        for (let i = 0; i < this.drops.length; i++) {
+            const char = CONFIG.matrixChars[Math.floor(Math.random() * CONFIG.matrixChars.length)];
+            this.ctx.fillText(char, i * 18, this.drops[i] * 18);
+            if (this.drops[i] * 18 > this.canvas.height && Math.random() > 0.975) this.drops[i] = 0;
+            this.drops[i]++;
         }
-        setInterval(draw, 33);
+        requestAnimationFrame(() => this.animate());
     }
+};
 
-    /* 3. BUTTON LOGIC (DÍ DỎM) */
-    function showModal(type) {
-        const modal = document.getElementById("modal");
-        const msg = document.getElementById("modalMsg");
-        modal.style.display = "block";
+const UI = {
+    heartCount: 0,
+
+    init() {
+        this.initRunaway();
+        this.initHeartClick();
+    },
+
+    initRunaway() {
+        const btn = document.getElementById('runaway-btn');
+        const move = () => {
+            // Debounce đơn giản bằng setTimeout hoặc giới hạn logic
+            const x = Math.random() * (window.innerWidth - btn.offsetWidth - 40) + 20;
+            const y = Math.random() * (window.innerHeight - btn.offsetHeight - 40) + 20;
+            btn.style.position = 'fixed';
+            btn.style.left = `${x}px`;
+            btn.style.top = `${y}px`;
+            btn.innerText = "Mơ đi! 😝";
+        };
+        btn.addEventListener('mouseover', move);
+        btn.addEventListener('touchstart', (e) => { e.preventDefault(); move(); });
+    },
+
+    initHeartClick() {
+        document.addEventListener('click', (e) => {
+            if (e.target.tagName === 'BUTTON' || this.heartCount >= CONFIG.maxHearts) return;
+            
+            this.heartCount++;
+            const heart = document.createElement('div');
+            heart.className = 'heart-particle';
+            heart.innerHTML = '💚';
+            heart.style.left = `${e.clientX - 10}px`;
+            heart.style.top = `${e.clientY - 10}px`;
+            document.body.appendChild(heart);
+            
+            setTimeout(() => { heart.remove(); this.heartCount--; }, 800);
+        });
+    },
+
+    showModal(type) {
+        const overlay = document.getElementById('modal-overlay');
+        const msg = document.getElementById('modal-msg');
+        overlay.style.display = 'flex';
+        
+        if (navigator.vibrate) navigator.vibrate(50); // Rung nhẹ mobile
 
         if (type === 'confirm') {
-            msg.innerHTML = "<b>XÁC NHẬN THÀNH CÔNG!</b><br><br>Gói bảo hành 'Vô thời hạn' đã được kích hoạt. Bạn đã chính thức sở hữu bản quyền trái tim này. Nghiêm cấm chia sẻ cho bên thứ ba! 💚";
-        } else if (type === 'cancel') {
-            msg.innerHTML = "<b>LỖI HỆ THỐNG: 403 FORBIDDEN</b><br><br>Hành động bị từ chối! Bạn đã lỡ click vào tình cảm này, hệ thống không cho phép quay xe dưới mọi hình thức. Chúc bạn may mắn lần sau! 😜";
+            msg.innerHTML = "<b>TRANSACTION COMPLETE!</b><br><br>Gói bảo hành 'Yêu thương vô hạn' đã được kích hoạt thành công. Đơn hàng không được hoàn trả dưới mọi hình thức! 💚😘";
+        } else {
+            msg.innerHTML = "<b>LỖI HỆ THỐNG: 403</b><br><br>Hành động bị từ chối. Trái tim đã bị Hacked, nút hủy đơn đã được thay thế bằng lệnh 'Thương Anh'.";
         }
-    }
+    },
 
-    function closeModal() {
-        document.getElementById("modal").style.display = "none";
+    closeModal() {
+        document.getElementById('modal-overlay').style.display = 'none';
     }
+};
 
-    /* NÚT HOÀN HÀNG CHẠY TRỐN */
-    function runAway() {
-        const btn = document.getElementById("returnBtn");
-        const x = Math.random() * (window.innerWidth - btn.clientWidth);
-        const y = Math.random() * (window.innerHeight - btn.clientHeight);
-        
-        btn.style.position = "fixed";
-        btn.style.left = x + "px";
-        btn.style.top = y + "px";
-        btn.innerText = "Còn lâu mới trả! 😝";
-    }
+// Start the engine
+Core.init();
 
-    /* 4. HEART CLICK EFFECT */
-    document.addEventListener("click", (e) => {
-        if (e.target.tagName === 'BUTTON') return;
-        const heart = document.createElement("div");
-        heart.innerHTML = "💚";
-        heart.style.position = "fixed";
-        heart.style.left = e.clientX + "px";
-        heart.style.top = e.clientY + "px";
-        heart.style.fontSize = "20px";
-        heart.style.pointerEvents = "none";
-        heart.style.animation = "floatUp 1s ease-out forwards";
-        document.body.appendChild(heart);
-        setTimeout(() => heart.remove(), 1000);
-    });
 </script>
-
 </body>
 </html>
